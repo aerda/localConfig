@@ -7,3 +7,8 @@ Allow the script to run, then run it
 chmod +x setupNVIM.sh
 ./setupNVIM.sh
 ```
+
+```bash
+chmod +x installPrograms.sh
+./setupNVIM.sh
+```
