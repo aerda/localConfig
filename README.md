@@ -10,5 +10,5 @@ chmod +x setupNVIM.sh
 
 ```bash
 chmod +x installPrograms.sh
-./setupNVIM.sh
+./installPrograms.sh
 ```
