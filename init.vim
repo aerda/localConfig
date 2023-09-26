@@ -1,5 +1,9 @@
-" <leader>
+" <Leader> key & waiting time
 let mapleader = ','
+set timeoutlen=2500
+
+" Enable Scrolling
+:set mouse=n
 
 " Don't try to be vi compatible
 set nocompatible
@@ -7,14 +11,11 @@ set nocompatible
 " Helps force plugins to load correctly when it is turned back on below
 filetype off
 
-" TODO: Load plugins here (pathogen or vundle)
-
 " Turn on syntax highlighting
 syntax on
 
 " For plugins to load correctly
 filetype plugin indent on
-
 
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
@@ -28,11 +29,9 @@ set wildmenu
 " Make wildmenu behave like similar to Bash completion.
 set wildmode=list:longest,list:full
 
-
 " There are certain files that we would never want to edit with Vim.
 " Wildmenu will ignore files with these extensions.
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
-
 
 " Security
 set modelines=0
@@ -83,6 +82,7 @@ set showmode
 set showcmd
 
 " Searching
+" --------------------
 set hlsearch
 set incsearch
 set ignorecase
@@ -95,6 +95,7 @@ nnoremap <esc><esc> :noh<return>
 nnoremap <space> :
 
 " Plugins
+" --------------------
 call plug#begin()
 
 " Colorscheme
@@ -112,14 +113,16 @@ Plug 'pangloss/vim-javascript'
 Plug 'elzr/vim-json'
 Plug 'dmmulroy/tsc.nvim'
 Plug 'mattn/emmet-vim'
+Plug 'dense-analysis/ale'
 
 " Helpers to code
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'HerringtonDarkholme/yats.vim'
-Plug 'prettier/vim-prettier'
+Plug 'prettier/vim-prettier', { 'do': 'npm install' }
 Plug 'tpope/vim-commentary'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'ryanoasis/vim-devicons'
+Plug 'mhinz/vim-grepper'
 
 " Icons for FzF
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -129,6 +132,7 @@ call plug#end()
 
 
 " COLORSCHEME CONF
+" --------------------
 colorscheme moonfly
 let g:lightline = { 'colorscheme': 'moonfly' }
 let g:moonflyCursorColor = v:true
@@ -147,36 +151,97 @@ augroup CustomHighlight
 augroup END
 
 " FZF CONF
+" --------------------
 let g:fzf_layout = { 'down': '40%' }
-nnoremap <leader>r :call SearchRelatedWord()<CR>
+nnoremap <Leader>F :call OpenFZFRecursivelyAtGitRoot()<CR>
 
-function! SearchRelatedWord()
-  " Obtiene la palabra debajo del cursor
-  let word_under_cursor = expand('<cword>')
+function! OpenFZFRecursivelyAtGitRoot()
+  " Get the root directory of the Git repository
+  let git_root = system('git rev-parse --show-toplevel')
 
-  " Ejecuta la búsqueda en archivos del mismo directorio
-  let cmd = 'grep -rl "\<'.word_under_cursor.'\>" '.expand('%:p:h')
-  let result = system(cmd)
+  " Trim any trailing newline characters
+  let git_root = substitute(git_root, '\n$', '', '')
 
-  " Abre la lista de resultados en fzf
+  " Check if git_root is empty (not in a Git repo)
+  if empty(git_root)
+    " If not in a Git repo, use the current working directory
+    let git_root = getcwd()
+  endif
+echo git_root 
+  " Open FZF and search for files recursively from the Git root directory
   call fzf#run({
-        \ 'source': split(result, "\n"),
+        \ 'source': 'find . -type d -name node_modules -prune -o -type f -print',
         \ 'sink': 'e',
+        \ 'dir': git_root,
         \ 'options': '--preview "cat {}"'
         \ })
 endfunction
 
+" COC CONF
+" --------------------
+" Remap keys for gotos
+nnoremap <silent> gd :call CocAction('jumpDefinition', 'tabe')<CR>
+nnoremap <silent> gy :call CocAction('jumpTypeDefinition', 'tabe')<CR>
+nnoremap <silent> gi :call CocAction('jumpImplementation', 'tabe')<CR>
+nnoremap <silent> gr :call CocAction('jumpReferences', 'tabe')<CR>
 
-" Map the F3 key to toggle :FILES in current directory
-nnoremap <F3> :Files %:p:h
+" GREPPER CONF
+" --------------------
+nnoremap <Leader>f :call ToggleGrepper()<CR>
 
-" COC.VIM CONF
-inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+function! ToggleGrepper()
+  if exists('g:grepper')
+    " If vim-grepper is already active, close the quickfix window
+    cclose
+    unlet! g:grepper
+  else
+    " If vim-grepper is not active, open it
+    Grepper
+  endif
+endfunction
+
 
 " NERDTreeToggle
-nmap <F6> :NERDTreeToggle<CR>
-" Open a file from NERDTree and keep it open when pressing "Shift + W"
-autocmd FileType nerdtree nnoremap <buffer> <Esc><Esc> :NERDTreeToggle<CR>
+" --------------------
+nnoremap <Leader>d :NERDTreeToggle<CR>
+" Toggle NERDTree to display the current directory
+nnoremap <Leader>D :NERDTreeToggle %:p:h<CR>
+
+" ALE linter
+" --------------------
+let g:ale_fixers = {
+    \ 'javascript': ['prettier', 'eslint'],
+    \ 'javascript.jsx': ['prettier', 'eslint'],
+    \ 'typescript': ['tslint', 'prettier', 'eslint'],
+    \ 'typescript.tsx': ['tslint', 'prettier', 'eslint'],
+    \ }
+
+" Enable auto-fixing on save
+let g:ale_fix_on_save = 1
+let g:ale_fixers['*'] = ['prettier']
 
 
+" Enable vim-prettier for JavaScript and JavaScript/JSX files
+" --------------------
+let g:prettier#quickfix_enabled = 0
+let g:prettier#autoformat = 1
+
+
+" General Leader Mapping
+" --------------------
+" Move to the next buffer using Leader + j
+nnoremap <Leader>j :bnext<CR>
+" Move to the previous buffer using Leader + k
+nnoremap <Leader>k :bprev<CR>
+" Open a vertical terminal with <leader>tv
+nnoremap <Leader>tv :vnew +term<CR>
+" Open a horizontal terminal with <leader>th
+nnoremap <Leader>th :split +term<CR>
+" Tabs
+nmap <leader>1 1gt
+nmap <leader>2 2gt
+nmap <leader>3 3gt
+nmap <leader>4 4gt
+nmap <leader>5 5gt
+nmap <leader>6 6gt
+nmap <leader>7 7gt
