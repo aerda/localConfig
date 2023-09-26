@@ -1,0 +1,12 @@
+{
+  "suggest.noselect": "silent",
+  "coc.preferences.jumps": {
+    "goes": "both",
+    "keymaps": {
+      "tab": "jumpSelect",
+      "<cr>": "jumpInsert",
+      "k": "jumpPrev",
+      "j": "jumpNext"
+    }
+  }
+}
