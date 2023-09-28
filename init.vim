@@ -123,6 +123,8 @@ Plug 'tpope/vim-commentary'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'ryanoasis/vim-devicons'
 Plug 'mhinz/vim-grepper'
+Plug 'findango/vim-mdx'
+Plug 'onsails/lspkind.nvim'
 
 " Icons for FzF
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -184,10 +186,15 @@ nnoremap <silent> gd :call CocAction('jumpDefinition', 'tabe')<CR>
 nnoremap <silent> gy :call CocAction('jumpTypeDefinition', 'tabe')<CR>
 nnoremap <silent> gi :call CocAction('jumpImplementation', 'tabe')<CR>
 nnoremap <silent> gr :call CocAction('jumpReferences', 'tabe')<CR>
+highlight CocError guifg=#FF0000
 
 " GREPPER CONF
 " --------------------
 nnoremap <Leader>f :call ToggleGrepper()<CR>
+nnoremap <leader>* :Grepper -tool ag -cword -noprompt<cr>
+" Put the greeper on the repo level
+let g:grepper_default_directory = system('git rev-parse --show-toplevel 2>/dev/null')
+
 
 function! ToggleGrepper()
   if exists('g:grepper')
@@ -196,7 +203,7 @@ function! ToggleGrepper()
     unlet! g:grepper
   else
     " If vim-grepper is not active, open it
-    Grepper
+    Grepper -r -I --files-with-matches .
   endif
 endfunction
 
@@ -221,6 +228,21 @@ let g:ale_fix_on_save = 1
 let g:ale_fixers['*'] = ['prettier']
 
 
+" LSP client
+" -------------------
+"set g:lsp_enable = 1
+
+let g:lspkind_symbols = {
+    \ 'Class' : ' ',
+    \ 'Function' : ' ',
+    \ 'Method' : ' ',
+    \ 'Field' : 'ﰠ ',
+    \ }
+
+" Set the completion source to lspkind-nvim
+set completeopt=menuone,noinsert,noselect
+set completefunc=lspkind#complete
+
 " Enable vim-prettier for JavaScript and JavaScript/JSX files
 " --------------------
 let g:prettier#quickfix_enabled = 0
@@ -238,10 +260,12 @@ nnoremap <Leader>tv :vnew +term<CR>
 " Open a horizontal terminal with <leader>th
 nnoremap <Leader>th :split +term<CR>
 " Tabs
-nmap <leader>1 1gt
-nmap <leader>2 2gt
-nmap <leader>3 3gt
-nmap <leader>4 4gt
-nmap <leader>5 5gt
-nmap <leader>6 6gt
-nmap <leader>7 7gt
+nmap <Leader>1 1gt
+nmap <Leader>2 2gt
+nmap <Leader>3 3gt
+nmap <Leader>4 4gt
+nmap <Leader>5 5gt
+nmap <Leader>6 6gt
+nmap <Leader>7 7gt
+nmap <Leader>ct :tabc<CR>
+nmap <Leader>cta :tabo<CR>
