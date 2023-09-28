@@ -1,12 +1,17 @@
 {
-  "suggest.noselect": "silent",
+  "coc-autoselect": true,
+  "diagnostic.virtualText": true,
+  "diagnostic.virtualTextPrefix": "<-",
+  "diagnostic.virtualTextLineNr": true,
+  "diagnostic.virtualTextCurrentLineOnly": true,
+  "diagnostic.enableMessage": "always",
+  "diagnostic.floatEnable": true,
   "coc.preferences.jumps": {
-    "goes": "both",
-    "keymaps": {
-      "tab": "jumpSelect",
-      "<cr>": "jumpInsert",
-      "k": "jumpPrev",
-      "j": "jumpNext"
-    }
+    "goes": "both"
+  },
+  "coc.source.jumps.keymaps": {
+    "<CR>": "jumpInsert",
+    "k": "jumpPrev",
+    "j": "jumpNext"
   }
 }
